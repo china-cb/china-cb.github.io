@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="胡霸的博客">
 <meta property="og:description" content="Hexo 是一个快速、简洁且高效的博客框架。Hexo 使用 Markdown（或其他渲染引擎）解析文章，在几秒内，即可利用靓丽的主题生成静态网页。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-07-31T15:04:23.733Z">
+<meta property="og:updated_time" content="2019-07-31T15:10:02.231Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="HEXO使用记录">
 <meta name="twitter:description" content="Hexo 是一个快速、简洁且高效的博客框架。Hexo 使用 Markdown（或其他渲染引擎）解析文章，在几秒内，即可利用靓丽的主题生成静态网页。">
@@ -367,7 +367,12 @@
 <p>language: zh-Hans</p>
 <p>或者</p>
 <p>anguage: zh-CN</p>
+<p><strong>【Hexo异常】fatal: in unpopulated submodule ‘.deploy_git’</strong><br>今天又重新搞了下hexo，好久不动它居然报了错。</p>
+<p>这种情况可以先安装下相关的依赖：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-deployer-git –save</span><br></pre></td></tr></table></figure>
 
+<p>实在不行，就把它删掉，然后重新生成和部署。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">rm -rf .deploy_git</span><br><span class="line">hexo g</span><br><span class="line">hexo d</span><br></pre></td></tr></table></figure>
       
     </div>
     
