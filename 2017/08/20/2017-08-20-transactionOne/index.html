@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="MySQL,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="事务简介事务就是锁和并发的结合体.  优势:容易理解 劣势:性能较低  扩展 - `DRDS/TDDL‵">
+<meta name="keywords" content="MySQL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="细说事物(第一天)">
+<meta property="og:url" content="https://china-cb.github.io/2017/08/20/2017-08-20-transactionOne/index.html">
+<meta property="og:site_name" content="胡霸的博客">
+<meta property="og:description" content="事务简介事务就是锁和并发的结合体.  优势:容易理解 劣势:性能较低  扩展 - `DRDS/TDDL‵">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-08-20T04:00:00.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="细说事物(第一天)">
+<meta name="twitter:description" content="事务简介事务就是锁和并发的结合体.  优势:容易理解 劣势:性能较低  扩展 - `DRDS/TDDL‵">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://china-cb.github.io/2017/08/20/2017-08-20-transactionOne/">
+
+
+
+
+
+  <title>细说事物(第一天) | 胡霸的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">胡霸的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Self-discipline gives freedom</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://china-cb.github.io/2017/08/20/2017-08-20-transactionOne/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="china-cb">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="胡霸的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">细说事物(第一天)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-20T12:00:00+08:00">
+                2017-08-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/数据库/" itemprop="url" rel="index">
+                    <span itemprop="name">数据库</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="事务简介"><a href="#事务简介" class="headerlink" title="事务简介"></a>事务简介</h1><p>事务就是<strong>锁</strong>和<strong>并发</strong>的结合体.</p>
+<ul>
+<li><strong>优势</strong>:容易理解</li>
+<li><strong>劣势</strong>:性能较低</li>
+</ul>
+<p>扩展 - `DRDS/TDDL‵<br> <a id="more"></a></p>
+<h3 id="ACID保证事务的完整性"><a href="#ACID保证事务的完整性" class="headerlink" title="ACID保证事务的完整性"></a>ACID保证事务的完整性</h3><ul>
+<li>原子性（Atomicity）</li>
+<li>一致性（Consistency）</li>
+<li>隔离性（Isolation）</li>
+<li>持久性（Durability）</li>
+</ul>
+<h3 id="单个事务单元"><a href="#单个事务单元" class="headerlink" title="单个事务单元"></a>单个事务单元</h3><ul>
+<li>商品要建立一个基于GMT_Modified的索引</li>
+<li>从数据库读取一行记录</li>
+<li>向数据库写入一行记录,同时更新这记录的所有索引</li>
+<li>删除整张表</li>
+</ul>
+<h3 id="一组事务单元"><a href="#一组事务单元" class="headerlink" title="一组事务单元"></a>一组事务单元</h3><ul>
+<li>Bob-&gt;Smith 100元</li>
+<li>Smith-&gt;Joe 100元</li>
+<li>Joe-&gt;Bob 100元</li>
+</ul>
+<h1 id="事务"><a href="#事务" class="headerlink" title="事务"></a>事务</h1><h3 id="产生的原因"><a href="#产生的原因" class="headerlink" title="产生的原因"></a>产生的原因</h3><p><strong>事务单元之间的Happen-before关系</strong></p>
+<ul>
+<li>读写</li>
+<li>写读</li>
+<li>读读</li>
+<li>写写</li>
+</ul>
+<h3 id="排队法"><a href="#排队法" class="headerlink" title="排队法"></a>排队法</h3><p><strong>序列化读写</strong></p>
+<ul>
+<li><strong>优势</strong>:不需要冲突控制</li>
+<li><strong>劣势</strong>:慢速设备</li>
+</ul>
+<table>
+<tr>
+<td>事务单元</td>
+<td>->读</td>
+<td>->读</td>
+<td>->写</td>
+<td>->读</td>
+<td>->写</td>
+<td>->写</td>
+<td>->读</td>
+</tr>
+</table>
+
+<h3 id="排他锁"><a href="#排他锁" class="headerlink" title="排他锁"></a>排他锁</h3><p><strong>针对同一单元的访问进行控制</strong></p>
+<table>
+<tr>
+<td>事务单元1</td>
+<td>->读</td>
+<td>->读</td>
+<td>->写</td>
+<td>->读</td>
+<td>->写</td>
+<td>->写</td>
+<td>->读</td>
+</tr>
+<tr>
+<td>事务单元2</td>
+<td>->写</td>
+<td>->读</td>
+<td>->写</td>
+<td>->读</td>
+<td>->写</td>
+<td>->读</td>
+<td>->读</td>
+</tr>
+</table>
+
+<h3 id="读写锁"><a href="#读写锁" class="headerlink" title="读写锁"></a>读写锁</h3><p><strong>针对读读场景进行优化</strong></p>
+<table>
+<tr>
+<td>事务单元1</td>
+<td>->写</td>
+<td>->读</td>
+<td>->写</td>
+<td>->读</td>
+<td>->写</td>
+<td>->写</td>
+<td>->读</td>
+</tr>
+<tr>
+<td>事务单元2</td>
+<td></td>
+<td>->读</td>
+<td></td>
+<td>->读</td>
+<td></td>
+<td></td>
+<td>->读</td>
+</tr>
+</table>
+
+
+<h3 id="MVCC"><a href="#MVCC" class="headerlink" title="MVCC"></a>MVCC</h3><p><strong>本质上来说就是copy on write,能够做到写不阻塞读</strong></p>
+<table>
+<tr>
+<td>事务单元1</td>
+<td>->写</td>
+<td>->写</td>
+<td>->写</td>
+<td>->写</td>
+<td>->写</td>
+<td>->写</td>
+<td>->写</td>
+</tr>
+<tr>
+<td>事务单元2</td>
+<td></td>
+<td>->读</td>
+<td></td>
+<td>->读</td>
+<td></td>
+<td>->读</td>
+<td>->读</td>
+</tr>
+<tr>
+<td>事务单元3</td>
+<td></td>
+<td>->读</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>->读</td>
+</tr>
+</table>
+
+<h1 id="事务处理"><a href="#事务处理" class="headerlink" title="事务处理"></a>事务处理</h1><h3 id="谁先谁后"><a href="#谁先谁后" class="headerlink" title="谁先谁后"></a>谁先谁后</h3><p><strong>在MMVC中一个读请求应该读哪一个写之后的数据?</strong></p>
+<ul>
+<li>SCN(Oracle)</li>
+<li>Trx_id(Innodb)</li>
+</ul>
+<h3 id="故障恢复"><a href="#故障恢复" class="headerlink" title="故障恢复"></a>故障恢复</h3><ul>
+<li>业务属性不匹配</li>
+<li>系统崩溃</li>
+</ul>
+<h3 id="死锁和死锁检测"><a href="#死锁和死锁检测" class="headerlink" title="死锁和死锁检测"></a>死锁和死锁检测</h3><p><strong>死锁产生的原因</strong></p>
+<ul>
+<li>两个线程</li>
+<li>不同方向</li>
+<li>相同资源</li>
+</ul>
+<p><strong>死锁的解决方法</strong></p>
+<ul>
+<li>降低隔离界别</li>
+<li>碰撞检测</li>
+<li>等锁超时</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/MySQL/" rel="tag"># MySQL</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/07/19/2017-07-19-fpm/" rel="next" title="简聊CGI,FastCGI,PHP-CGI,PHP-FPM之间的关系">
+                <i class="fa fa-chevron-left"></i> 简聊CGI,FastCGI,PHP-CGI,PHP-FPM之间的关系
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/10/28/2017-10-28-transactionTwo/" rel="prev" title="细说事物(第二天)">
+                细说事物(第二天) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">china-cb</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">46</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#事务简介"><span class="nav-number">1.</span> <span class="nav-text">事务简介</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ACID保证事务的完整性"><span class="nav-number">1.0.1.</span> <span class="nav-text">ACID保证事务的完整性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#单个事务单元"><span class="nav-number">1.0.2.</span> <span class="nav-text">单个事务单元</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一组事务单元"><span class="nav-number">1.0.3.</span> <span class="nav-text">一组事务单元</span></a></li></ol></li></ol><li class="nav-item nav-level-1"><a class="nav-link" href="#事务"><span class="nav-number">2.</span> <span class="nav-text">事务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#产生的原因"><span class="nav-number">2.0.1.</span> <span class="nav-text">产生的原因</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#排队法"><span class="nav-number">2.0.2.</span> <span class="nav-text">排队法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#排他锁"><span class="nav-number">2.0.3.</span> <span class="nav-text">排他锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#读写锁"><span class="nav-number">2.0.4.</span> <span class="nav-text">读写锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MVCC"><span class="nav-number">2.0.5.</span> <span class="nav-text">MVCC</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#事务处理"><span class="nav-number">3.</span> <span class="nav-text">事务处理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#谁先谁后"><span class="nav-number">3.0.1.</span> <span class="nav-text">谁先谁后</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#故障恢复"><span class="nav-number">3.0.2.</span> <span class="nav-text">故障恢复</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#死锁和死锁检测"><span class="nav-number">3.0.3.</span> <span class="nav-text">死锁和死锁检测</span></a></li></ol></li></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">china-cb</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="PHP,内核,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="PHP资料 http://www.phpinternalsbook.com/  PHP下载 官网下载:https://secure.php.net/downloads.php  GITHUB: http://github.com/php/php-src">
+<meta name="keywords" content="PHP,内核">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PHP-扩展(Extensions)">
+<meta property="og:url" content="https://china-cb.github.io/2018/08/20/2018-08-20-PhpExtensions/index.html">
+<meta property="og:site_name" content="胡霸的博客">
+<meta property="og:description" content="PHP资料 http://www.phpinternalsbook.com/  PHP下载 官网下载:https://secure.php.net/downloads.php  GITHUB: http://github.com/php/php-src">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-07-31T13:57:51.487Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PHP-扩展(Extensions)">
+<meta name="twitter:description" content="PHP资料 http://www.phpinternalsbook.com/  PHP下载 官网下载:https://secure.php.net/downloads.php  GITHUB: http://github.com/php/php-src">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://china-cb.github.io/2018/08/20/2018-08-20-PhpExtensions/">
+
+
+
+
+
+  <title>PHP-扩展(Extensions) | 胡霸的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">胡霸的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Self-discipline gives freedom</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://china-cb.github.io/2018/08/20/2018-08-20-PhpExtensions/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="china-cb">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="胡霸的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">PHP-扩展(Extensions)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-08-20T00:00:00+08:00">
+                2018-08-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/PHP/" itemprop="url" rel="index">
+                    <span itemprop="name">PHP</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="PHP资料"><a href="#PHP资料" class="headerlink" title="PHP资料"></a>PHP资料</h1><blockquote>
+<p><a href="http://www.phpinternalsbook.com/" target="_blank" rel="noopener">http://www.phpinternalsbook.com/</a></p>
+</blockquote>
+<h2 id="PHP下载"><a href="#PHP下载" class="headerlink" title="PHP下载"></a>PHP下载</h2><ul>
+<li><p>官网下载:<a href="https://secure.php.net/downloads.php" target="_blank" rel="noopener">https://secure.php.net/downloads.php</a></p>
+</li>
+<li><p>GITHUB: <a href="http://github.com/php/php-src" target="_blank" rel="noopener">http://github.com/php/php-src</a></p>
+<a id="more"></a>
+
+</li>
+</ul>
+<h2 id="构建依赖程序"><a href="#构建依赖程序" class="headerlink" title="构建依赖程序"></a>构建依赖程序</h2><p>在继续之前,您可能应该与包管理器一起安装一些基本构建依赖项(默认情况下,您可能已经安装了前三个):</p>
+<ul>
+<li>gcc或其他一些编译器套件.</li>
+<li>libc-dev,它提供C标准库,包括头文件.</li>
+<li>make,这是PHP使用的构建管理工具.</li>
+<li>autoconf(2.59或更高版本),用于生成配置脚本.</li>
+<li>automake(1.4或更高),它生成 Makefile.in文件.</li>
+<li>libtool帮助管理共享库.</li>
+<li>bison(2.4或更高版本),用于生成PHP解析器.</li>
+<li>re2c(可选),用于生成PHP词法分析器.由于git存储库已经包含一个生成的词法分析器,所以只需要修改它就需要re2c.</li>
+</ul>
+<p>在Debian/Ubuntu上,您可以使用以下命令安装所有这些:<br><code>sudo apt-get install build-essential autoconf automake libtool bison re2c</code></p>
+<h2 id="配置选项讲解-configure-help-less"><a href="#配置选项讲解-configure-help-less" class="headerlink" title="配置选项讲解:./configure --help | less"></a>配置选项讲解:<code>./configure --help | less</code></h2><p>使用<code>--enable-NAME</code>和<code>--disable-NAME</code>开关编译哪些扩展和SAPI .</p>
+<p>如果扩展或SAPI具有外部依赖关系,则需要使用<code>--with-NAME</code>和<code>--without-NAME</code>.</p>
+<p>如果NAME所需的库 不在默认位置(例如,因为您自己编译),则可以使用<code>--with-NAME = DIR</code>指定其位置.</p>
+<p>如果选项是<code>--enable-NAME</code>或<code>--with-NAME</code>说明该选项默认是关闭的.如果是<code>--disable-NAME</code>或<code>--without-NAME</code>说明该选项默认是开启的.</p>
+<h2 id="我们要进行的配置和编译命令"><a href="#我们要进行的配置和编译命令" class="headerlink" title="我们要进行的配置和编译命令:"></a>我们要进行的配置和编译命令:</h2><pre><code>./configure --disable-all --enable-cli --enable-debug
+    (--enable-debug启用调试模式,具有多重效果:
+    编译将使用 -g运行以生成包括行号、变量的类型和作用域、函数名字、函数参数和函数的作用域等源文件特性的调试信息.
+    另外使用-O0,会让gcc编译时不对代码优化.
+    此外,调试模式定义了 ZEND_DEBUG宏,它将启动引擎中的各种调试助手.除其他事项外,还将报告内存泄漏以及某些数据结构的不正确使用.)
+make -jN
+    (N为CPU数量,作用:make --help查看)</code></pre><h2 id="PHP内核源码目录结构"><a href="#PHP内核源码目录结构" class="headerlink" title="PHP内核源码目录结构"></a>PHP内核源码目录结构</h2><pre><code>php-744.1.4
+├── build   //源码编译相关文件
+└── ext     //官方扩展目录,包括了绝大多数PHP的函数的定义和实现
+└── main    //PHP核心基本文件,这里和Zend引擎不一样,Zend引擎主要实现语言最核心的语言运行环境.
+└── pear    //“PHP 扩展与应用仓库”,包含PEAR的核心文件.
+└── sapi    //包含了各种服务器抽象层的代码,例如apache的mod_php,cgi,fastcgi以及fpm等等接口.
+└── tests   //PHP的测试脚本集合,包含PHP各项功能的测试文件
+└── TSRM    //PHP的线程安全是构建在TSRM库之上的,PHP实现中常见的*G宏通常是对TSRM的封装,TSRM(Thread Safe Resource Manager)线程安全资源管理器.
+└── win32   //Windows平台相关的一些实现,比如sokcet的实现在Windows下和*Nix平台就不太一样,同时也包括了Windows下编译PHP相关的脚本.
+└── Zend    //Zend引擎的实现目录,比如脚本的词法语法解析,opcode的执行以及扩展机制的实现等等.
+└── .gdbinit            //gdb命令编写脚本   (gdb) source /home/laruence/package/php-5.2.14/.gdbinit       (gdb) zbacktrace
+└── CODING_STANDARDS    //PHP编码标准
+└── config.guess        //由automake产生,两个用于目标平台检测的脚本
+└── config.log          //configure执行时生成的日志文件
+└── config.nice         //configure执行时生成,记录了上次执行configure时带的详细参数
+└── config.status       //configure执行时生成,实际调用编译工具构建软件的shell脚本
+└── config.sub          //由automake产生,两个用于目标平台检测的脚本
+└── configure           //配置并生成makefile
+└── configure.in        //autoreconf创建,开发者维护,用于生成configure
+└── CREDITS             //开发人员名单
+└── EXTENSIONS          //扩展说明(维护状态,维护人员,版本,适用系统..)
+└── LICENSE             //发布协议
+└── php.ini-development //PHP开发环境示例配置文件
+└── php.ini-production  //PHP生产环境示例配置文件
+└── README.EXT_SKEL     //构建扩展脚本说明
+└── README.GIT-RULES    //GIT提交时的规则
+└── README.namespaces   //命名空间说明
+└── README.PARAMETER_PARSING_API    //新的参数解析函数说明
+└── README.REDIST.BINS              //PHP中引用到的其它程序协议说明
+└── README.RELEASE_PROCESS          //PHP发布过程说明
+└── README.SELF-CONTAINED-EXTENSIONS//创建一个内建的PHP扩展
+└── README.STREAMS                  //PHP Streams(流概念) 说明
+└── README.SUBMITTING_PATCH         //介绍如何提交PHP的增强功能或修补程序
+└── README.TESTING                  //测试说明(run-tests.php)
+└── README.TESTING2                 //测试说明(server-tests.php)
+└── README.UNIX-BUILD-SYSTEM        //PHP编译系统V5概述
+└── README.WIN32-BUILD-SYSTEM       //WIN32编译说明
+└── run-test.php                    //测试脚本
+└── server-test.php                 //测试脚本
+└── sesrver-test-config.php         //测试脚本
+└── UPGRADING                       //版本更新说明
+└── UPGRADING.INTERNALS             //内部更新说明</code></pre><h2 id="PHP扩展分类"><a href="#PHP扩展分类" class="headerlink" title="PHP扩展分类"></a>PHP扩展分类</h2><p>PHP中的扩展分为两类:PHP扩展、Zend扩展,对内核而言这两个分别称之为:模块(module)、扩展(extension),我们主要介绍是PHP扩展,也就是模块.</p>
+<h3 id="加载区别"><a href="#加载区别" class="headerlink" title="加载区别:"></a>加载区别:</h3><ul>
+<li>PHP扩展(又名PHP“模块”)使用“extension = test.so”行加载到INI文件中</li>
+<li>Zend扩展使用“zend_extension = test.so”行加载到INI文件中</li>
+</ul>
+<p>Zend扩展比PHP扩展更复杂,因为它们有更多的钩子,而且更接近Zend引擎及其虚拟机(整个PHP源代码中最复杂的部分).<br>Zend扩展例子如:OPCache,XDebug,phpdbg,Zend扩展通常用来处理两种任务:调试器和剖析器.如果您的目标是“只是”向PHP 添加一些新概念(函数,类,常量等),那么您将使用PHP扩展,但如果需要更改PHP的当前行为,可能Zend扩展将会更好.</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/PHP/" rel="tag"># PHP</a>
+          
+            <a href="/tags/内核/" rel="tag"># 内核</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/06/13/2018-06-27-OutOfMemory/" rel="next" title="Apache内存溢出的分析与解决">
+                <i class="fa fa-chevron-left"></i> Apache内存溢出的分析与解决
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/10/13/2018-10-13-SAPI/" rel="prev" title="PHP-数据结构(SAPI)">
+                PHP-数据结构(SAPI) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">china-cb</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">46</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#PHP资料"><span class="nav-number">1.</span> <span class="nav-text">PHP资料</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#PHP下载"><span class="nav-number">1.1.</span> <span class="nav-text">PHP下载</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#构建依赖程序"><span class="nav-number">1.2.</span> <span class="nav-text">构建依赖程序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置选项讲解-configure-help-less"><span class="nav-number">1.3.</span> <span class="nav-text">配置选项讲解:./configure --help | less</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#我们要进行的配置和编译命令"><span class="nav-number">1.4.</span> <span class="nav-text">我们要进行的配置和编译命令:</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PHP内核源码目录结构"><span class="nav-number">1.5.</span> <span class="nav-text">PHP内核源码目录结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PHP扩展分类"><span class="nav-number">1.6.</span> <span class="nav-text">PHP扩展分类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#加载区别"><span class="nav-number">1.6.1.</span> <span class="nav-text">加载区别:</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">china-cb</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

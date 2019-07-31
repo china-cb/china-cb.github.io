@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="watch,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Kubernetes and Docker Swarm are probably two most commonly used tools to deploy containers inside a cluster. Both are created as helper tools that can be used to manage a cluster of containers and tre">
+<meta name="keywords" content="watch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kubernetes vs Docker Swarm">
+<meta property="og:url" content="https://china-cb.github.io/2019/06/24/2019-06-24-k8sVSswarm/index.html">
+<meta property="og:site_name" content="胡霸的博客">
+<meta property="og:description" content="Kubernetes and Docker Swarm are probably two most commonly used tools to deploy containers inside a cluster. Both are created as helper tools that can be used to manage a cluster of containers and tre">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-07-31T13:57:51.491Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Kubernetes vs Docker Swarm">
+<meta name="twitter:description" content="Kubernetes and Docker Swarm are probably two most commonly used tools to deploy containers inside a cluster. Both are created as helper tools that can be used to manage a cluster of containers and tre">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://china-cb.github.io/2019/06/24/2019-06-24-k8sVSswarm/">
+
+
+
+
+
+  <title>Kubernetes vs Docker Swarm | 胡霸的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">胡霸的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Self-discipline gives freedom</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://china-cb.github.io/2019/06/24/2019-06-24-k8sVSswarm/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="china-cb">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="胡霸的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Kubernetes vs Docker Swarm</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-06-24T00:00:00+08:00">
+                2019-06-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/容器/" itemprop="url" rel="index">
+                    <span itemprop="name">容器</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Kubernetes and Docker Swarm are probably two most commonly used tools to deploy containers inside a cluster. Both are created as helper tools that can be used to manage a cluster of containers and treat all servers as a single unit. However, they differ greatly in their approach.<br> <a id="more"></a></p>
+<p><a href="https://www.oschina.net/translate/docker-clustering-tools-compared-kubernetes-vs-docker-swarm?cmp" target="_blank" rel="noopener">文章转载</a></p>
+<p>Kubernetes and Docker Swarm are probably two most commonly used tools to deploy containers inside a cluster. Both are created as helper tools that can be used to manage a cluster of containers and treat all servers as a single unit. However, they differ greatly in their approach.</p>
+<h1 id="Kubernetes"><a href="#Kubernetes" class="headerlink" title="Kubernetes"></a>Kubernetes</h1><p>Kubernetes is based on Google’s experience of many years working with Linux containers. It is, in a way, a replica of what Google has been doing for a long time but, this time, adapted to Docker. That approach is great in many ways, most important being that they used their experience from the start. If you started using Kubernetes around Docker version 1.0 (or earlier), the experience with Kubernetes was great. It solved many of the problems that Docker itself had. We could mount persistent volumes that would allow us to move containers without loosing data, it used flannel to create networking between containers, it has load balancer integrated, it uses etcd for service discovery, and so on. However, Kubernetes comes at a cost. It uses a different CLI, different API and different YAML definitions. In other words, you cannot use Docker CLI nor you can use Docker Compose to define containers. Everything needs to be done from scratch exclusively for Kubernetes. It’s as if the tool was not written for Docker (which is partly true). Kubernetes brought clustering to a new level but at the expense of usability and steep learning curve.</p>
+<h1 id="Docker-Swarm"><a href="#Docker-Swarm" class="headerlink" title="Docker Swarm"></a>Docker Swarm</h1><p>Docker Swarm took a different approach. It is a native clustering for Docker. The best part is that it exposes standard Docker API meaning that any tool that you used to communicate with Docker (Docker CLI, Docker Compose, Dokku, Krane, and so on) can work equally well with Docker Swarm. That in itself is both an advantage and a disadvantage at the same time. Being able to use familiar tools of your own choosing is great but for the same reasons we are bound by the limitations of Docker API. If the API doesn’t support something, there is no way around it through Swarm API and some clever tricks need to be performed.</p>
+<p>We’ll explore those two tools in more details based on their setup and features they provide for running containers in a cluster.</p>
+<h2 id="Setting-Up"><a href="#Setting-Up" class="headerlink" title="Setting Up"></a>Setting Up</h2><p>Setting up Docker Swarm is easy, straightforward and flexible. All we have to do is install one of the service discovery tools and run the swarm container on all nodes. Since the distribution itself is packed as a Docker container, it works in the same way no matter the operating system. We run the swarm container, expose a port and inform it about the address of the service discovery. It could hardly be easier than that. We can even start using it without any service discovery tool, see whether we like it and when our usage of it becomes more serious, add etcd, Consul or some of the other supported tools.</p>
+<p>Kubernetes setup is quite more complicated and obfuscated. Installation instructions differ from OS to OS and provider to provider. Each OS or a hosting provider comes with its own set of instructions each of them having a separate maintenance team with a separate set of problems. As example, if you choose to try it out with Vagrant, you are stuck with Fedora. That does not mean that you cannot run it with Vagrant and, let’s say, Ubuntu or CoreOS. You can, but you need to start searching for instructions outside the official Kubernetes Getting Started page. Whatever your needs are, it’s likely that the community has the solution but you still need to spend some time searching for it and hoping that it works from the first attempt. The bigger problem is that the installation relies on a bash script. That would not be a big deal in itself if we would not live in the era where configuration management is a must. We might not want to run a script but make Kubernetes be part of our Puppet, Chef or Ansible definitions. Again, this can be overcome as well. You can find Ansible playbooks for running Kubernetes or you can write your own. None of those issues are a big problem but, when compared with Swarm, they are a bit painful. With Docker we were supposed not to have installation instructions (aside from a few docker run arguments). We were supposed to run containers. Swarm fulfils that promise and Kubernetes doesn’t.</p>
+<p>While some might not care about which discovery tool is used, I love the simplicity behind Swarm and the logic “batteries included but removable”. Everything works out-of-the-box but we still have the option to substitute one component with the other. Unlike Swarm, Kubernetes is opinionated tool. You need to live with the choices it made for you. If you want to use Kubernetes, you have to use etcd. I’m not trying to say that etcd is bad (quite contrary) but if you prefer, for example, to use Consul you’re in a very complicated situation and would need to use one for Kubernetes and the other for the rest of your service discovery needs. Another thing I dislike about Kubernetes is its need to know things in advance, before the setup. You need to tell it the addresses of all your nodes, which role each of them has, how many minions there are in the cluster and so on. With Swarm, we just bring up a node and tell it to join the network. Nothing needs to be set in advance since the information about the cluster is propagated through gossip.</p>
+<p>Set up might not be the most important difference between those tools. No matter which tool you choose, sooner or later everything will be up and running and you’ll forget any trouble you might have had during the process. You might say that we should not choose one tool over the other only because one is easier to set up. Fair enough. Let’s move on and speak about differences in how you define containers that should be run with those tools.</p>
+<h2 id="Running-Containers"><a href="#Running-Containers" class="headerlink" title="Running Containers"></a>Running Containers</h2><p>How do you define all the arguments needed for running Docker containers with Swarm? You don’t! Actually, you do but not in any form or way different from the way you were defining them before Swarm. If you are used to run containers through Docker CLI, you can continue using it with (almost) the same commands. If you prefer to use Docker Compose to run containers, you can continue using it to run them inside the Swarm cluster. Whichever way you’re used to run your containers, chances are that you can continue doing the same with Swarm but on a much larger scale.</p>
+<p>Kubernetes requires you to learn its CLI and configurations. You cannot use docker-compose.yml definitions you created earlier. You’ll have to create Kubernetes equivalents. You cannot use Docker CLI commands you learned before. You’ll have to learn Kubernetes CLI and, likely, make sure that the whole organization learns it as well.</p>
+<p>No matter which tool you choose for deployments to your cluster, chances are you are already familiar with Docker. You are probably already used to Docker Compose as a way to define arguments for the containers you’ll run. If you played with it for more than a few hours, you are using it as a substitute for Docker CLI. You run containers with it, tail their logs, scale them, and so on. On the other hand, you might be a hard-core Docker user who does not like Docker Compose and prefer running everything through Docker CLI or you might have your own bash scripts that run containers for you. No matter what you choose, it should work with Docker Swarm.</p>
+<p>If you adopt Kubernetes, be prepared to have multiple definitions of the same thing. You will need Docker Compose to run your containers outside Kubernetes. Developers will continue needing to run containers on their laptops, your staging environments might or might not be a big cluster, and so on. In other words, once you adopt Docker, Docker Compose or Docker CLI are unavoidable. You have to use them one way or another. Once you start using Kubernetes you will discover that all your Docker Compose definitions (or whatever else you might be using) need to be translated to Kubernetes way of describing things and, from there on, you will have to maintain both. With Kubernetes everything will have to be duplicated resulting in higher cost of maintenance. And it’s not only about duplicated configurations. Commands you’ll run outside of the cluster will be different from those inside the cluster. All those Docker commands you learned and love will have to get their Kubernetes equivalents inside the cluster.</p>
+<p>Guys behind Kubernetes are not trying to make your life miserable by forcing you to do things “their way”. The reason for such big differences is in a different approaches Swarm and Kubernetes are using to tackle the same problem. Swarm team decided to match their API with the one from Docker. As a result, we have (almost) full compatibility. Almost everything we can do with Docker we can do with Swarm as well only on a much larger scale. There’s nothing new to do, no configurations to be duplicated and nothing new to learn. No matter whether you use Docker CLI directly or go through Swarm, API is (more or less) the same. The negative side of that story is that if there is something you’d like Swarm to do and that something is not part of the Docker API, you’re in for a disappointment. Let us simplify this a bit. If you’re looking for a tool for deploying containers in a cluster that will use Docker API, Swarm is the solution. On the other hand, if you want a tool that will overcome Docker limitations, you should go with Kubernetes. It is power (Kubernetes) against simplicity (Swarm). Or, at least, that’s how it was until recently. But, I’m jumping ahead of myself.</p>
+<p>The only question unanswered is what those limitations are. Two of the major ones were networking and persistent volumes. Until Docker Swarm release 1.0 we could not link containers running on different servers. Actually, we still cannot link them but now we have multi-host networking to help us connect containers running on different servers. It is a very powerful feature. Kubernetes used flannel to accomplish networking and now, since the Docker release 1.9, that feature is available as part of Docker CLI.</p>
+<p>Another problem were persistent volumes. Docker introduced them in release 1.9. Until recently, if you persist a volume, that container was tied to the server that volume resides. It could not be moved around without, again, resorting to some nasty tricks like copying volume directory from one server to another. That in itself is a slow operation that defies the goals of tools like Swarm. Besides, even if you have time to copy a volume from one to the other server, you do not know where to copy since clustering tools tend to treat your whole datacenter as a single entity. You containers will be deployed to a location most suitable for them (least number of containers running, most CPUs or memory available, and so on). Now we have persistent volumes supported by Docker natively.</p>
+<p>Both networking and persistent volumes problems were one of the features supported by Kubernetes for quite some time and the reason why many were choosing it over Swarm. That advantage disappeared with Docker release 1.9.</p>
+<h2 id="The-Choice"><a href="#The-Choice" class="headerlink" title="The Choice"></a>The Choice</h2><p>When trying to make a choice between Docker Swarm and Kubernetes, think in following terms. Do you want to depend on Docker itself solving problems related to clustering. If you do, choose Swarm. If something is not supported by Docker it will be unlikely that it will be supported by Swarm since it relies on Docker API. On the other hand, if you want a tool that works around Docker limitations, Kubernetes might be the right one for you. Kubernetes was not built around Docker but is based on Google’s experience with containers. It is opinionated and tries to do things in its own way.</p>
+<p>The real question is whether Kubernetes’ way of doing things, which is quite different from how we use Docker, is overshadowed by advantages it gives. Or, should we place our bets into Docker itself and hope that it will solve those problems? Before you answer those questions, take a look at the release 1.9. We got persistent volumes and software networking. We also got unless-stopped restart policy that will manage our unwanted failures. Now there are three things less of a difference between Kubernetes and Swarm. Actually, these days there are very few advantages Kubernetes has over Swarm. On the other hand, Swarm uses Docker API meaning that you get to keep all your commands and Docker Compose configurations. Personally, I’m placing my bets on Docker engine getting improvements and Docker Swarm running on top of it. The difference between the two is very small. Both are production ready but Swarm is easier to set up, easier to use and we get to keep everything we built before moving to the cluster; there is no duplication between cluster and non-cluster configurations.</p>
+<p>My recommendation is to go with Docker Swarm. Kubernetes is too opinionated, hard to set up, too different from Docker CLI/API and at the same time it doesn’t have real advantages over Swarm since the Docker release 1.9. That doesn’t mean that there are no features available in Kubernetes that are not supported by Swarm. There are feature differences in both directions. However, those differences are, in my opinion, not major ones and the gap is getting smaller with each Docker release. Actually, for many use cases there is no gap at all while Docker Swarm is easier to set up, learn and use.</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/watch/" rel="tag"># watch</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/06/23/2019-06-23-ubuntu/" rel="next" title="ubuntu18.04优化">
+                <i class="fa fa-chevron-left"></i> ubuntu18.04优化
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/07/05/2019-07-05-REST,GraphQL,Webhooks,gRPC/" rel="prev" title="When to Use What: REST, GraphQL, Webhooks, & gRPC">
+                When to Use What: REST, GraphQL, Webhooks, & gRPC <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">china-cb</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">46</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Kubernetes"><span class="nav-number">1.</span> <span class="nav-text">Kubernetes</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Docker-Swarm"><span class="nav-number">2.</span> <span class="nav-text">Docker Swarm</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Setting-Up"><span class="nav-number">2.1.</span> <span class="nav-text">Setting Up</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Running-Containers"><span class="nav-number">2.2.</span> <span class="nav-text">Running Containers</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#The-Choice"><span class="nav-number">2.3.</span> <span class="nav-text">The Choice</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">china-cb</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

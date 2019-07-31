@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="PHP,内核,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="在PHP生命周期的各个阶段，一些与服务相关的操作都是通过SAPI接口实现。这些内置实现的物理位置在PHP源码的SAPI目录。这个目录存放了PHP对各个服务器抽象层的代码，例如命令行程序的实现，Apache的mod_php模块实现以及fastcgi的实现等等。">
+<meta name="keywords" content="PHP,内核">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PHP-数据结构(SAPI)">
+<meta property="og:url" content="https://china-cb.github.io/2018/10/13/2018-10-13-SAPI/index.html">
+<meta property="og:site_name" content="胡霸的博客">
+<meta property="og:description" content="在PHP生命周期的各个阶段，一些与服务相关的操作都是通过SAPI接口实现。这些内置实现的物理位置在PHP源码的SAPI目录。这个目录存放了PHP对各个服务器抽象层的代码，例如命令行程序的实现，Apache的mod_php模块实现以及fastcgi的实现等等。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-07-31T13:57:51.491Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PHP-数据结构(SAPI)">
+<meta name="twitter:description" content="在PHP生命周期的各个阶段，一些与服务相关的操作都是通过SAPI接口实现。这些内置实现的物理位置在PHP源码的SAPI目录。这个目录存放了PHP对各个服务器抽象层的代码，例如命令行程序的实现，Apache的mod_php模块实现以及fastcgi的实现等等。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://china-cb.github.io/2018/10/13/2018-10-13-SAPI/">
+
+
+
+
+
+  <title>PHP-数据结构(SAPI) | 胡霸的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">胡霸的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Self-discipline gives freedom</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://china-cb.github.io/2018/10/13/2018-10-13-SAPI/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="china-cb">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="胡霸的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">PHP-数据结构(SAPI)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-13T00:00:00+08:00">
+                2018-10-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/PHP/" itemprop="url" rel="index">
+                    <span itemprop="name">PHP</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在PHP生命周期的各个阶段，一些与服务相关的操作都是通过SAPI接口实现。这些内置实现的物理位置在PHP源码的SAPI目录。这个目录存放了PHP对各个服务器抽象层的代码，例如命令行程序的实现，Apache的mod_php模块实现以及fastcgi的实现等等。<br> <a id="more"></a></p>
+<p><code>SAPI</code>分别在<code>FPM</code>和<code>CLI</code>下是如何运行的？</p>
+<h1 id="SAPI"><a href="#SAPI" class="headerlink" title="SAPI"></a>SAPI</h1><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">test.php</span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    $temp = $_POST;</span><br><span class="line">    print_r($temp);</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>FPM</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> sapi_module_struct cgi_sapi_module = &#123;</span><br><span class="line">    <span class="string">"fpm_fcgi"</span>,</span><br><span class="line">    ...</span><br><span class="line">    sapi_cgibin_ub_write,</span><br><span class="line">    sapi_cgibin_flush,</span><br><span class="line">    ...</span><br><span class="line">    sapi_cgi_read_post,</span><br><span class="line">    ...</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>CLI</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> sapi_module_struct cgi_sapi_module = &#123;</span><br><span class="line">    <span class="string">"cli"</span>,</span><br><span class="line">    ...</span><br><span class="line">    sapi_cli_ub_write,</span><br><span class="line">    sapi_cli_flush,</span><br><span class="line">    ...</span><br><span class="line">    <span class="literal">NULL</span>,</span><br><span class="line">    ...</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h3 id="sapi模块结构体"><a href="#sapi模块结构体" class="headerlink" title="sapi模块结构体"></a>sapi模块结构体</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> _<span class="title">sapi_module_struct</span> &#123;</span></span><br><span class="line">    <span class="keyword">char</span> *name;</span><br><span class="line">    <span class="keyword">char</span> *pretty_name;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">int</span> (*startup)(struct _sapi_module_struct *sapi_module);<span class="comment">//PHP被调用的时候,这个函数会被调用执行</span></span><br><span class="line">    <span class="keyword">int</span> (*shutdown)(struct _sapi_module_struct *sapi_module);<span class="comment">//PHP调用结束的时候,这个函数会被调用执行</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> (*activate)(<span class="keyword">void</span>);<span class="comment">//每个request开始时会执行,进行一些初始化,资源分配的事务</span></span><br><span class="line">    <span class="keyword">int</span> (*deactivate)(<span class="keyword">void</span>);<span class="comment">//每个request结束时会执行</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">size_t</span> (*ub_write)(<span class="keyword">const</span> <span class="keyword">char</span> *str, <span class="keyword">size_t</span> str_length);<span class="comment">//这个hanlder告诉了Zend,如何输出数据,对于mod_php来说,这个函数提供了一个向response数据写的接口,而CLI只是简单的写到stdout</span></span><br><span class="line">    <span class="keyword">void</span> (*flush)(<span class="keyword">void</span> *server_context);<span class="comment">//这个是提供给zend的刷新缓存的函数句柄,对于CLI来说,只是简单的调用系统提供的fflush;</span></span><br><span class="line">    <span class="keyword">zend_stat_t</span> *(*get_stat)(<span class="keyword">void</span>);<span class="comment">//这部分用来让Zend可以验证一个要执行脚本文件的state,从而判断文件是否据有执行权限等等.</span></span><br><span class="line">    <span class="keyword">char</span> *(*getenv)(<span class="keyword">char</span> *name, <span class="keyword">size_t</span> name_len);<span class="comment">//为Zend提供了一个根据name来查找环境变量的接口,对于mod_php5来说,当我们在脚本中调用getenv的时候,就会间接的调用这个句柄.CLI和CGI很类似,直接调用父级是Shell, 所以,只是简单的调用了系统提供的genenv:</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">void</span> (*sapi_error)(<span class="keyword">int</span> type, <span class="keyword">const</span> <span class="keyword">char</span> *error_msg, ...) ZEND_ATTRIBUTE_FORMAT(<span class="built_in">printf</span>, <span class="number">2</span>, <span class="number">3</span>);<span class="comment">//错误处理函数</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> (*header_handler)(sapi_header_struct *sapi_header, sapi_header_op_enum op, sapi_headers_struct *sapi_headers);<span class="comment">//这个函数会在我们调用PHP的header()函数的时候被调用.</span></span><br><span class="line">    <span class="keyword">int</span> (*send_headers)(sapi_headers_struct *sapi_headers);<span class="comment">//这个函数会在要真正发送header的时候被调用,一般来说,就是当有任何的输出要发送之前:</span></span><br><span class="line">    <span class="keyword">void</span> (*send_header)(sapi_header_struct *sapi_header, <span class="keyword">void</span> *server_context);<span class="comment">//这个用来单独发送每一个header</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">size_t</span> (*read_post)(<span class="keyword">char</span> *buffer, <span class="keyword">size_t</span> count_bytes);<span class="comment">//这个句柄指明了如何获取POST的数据,CLI是从stdin中读取POST DATA的,</span></span><br><span class="line">    <span class="keyword">char</span> *(*read_cookies)(<span class="keyword">void</span>);<span class="comment">//这个句柄指明了如何获取cookies的数据</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">void</span> (*register_server_variables)(zval *track_vars_array);<span class="comment">//这个函数用以给$_SERVER变量中添加变量,CLI在此函数中注册了PHP_SELF,SCRIPT_FILENAME等server变量:</span></span><br><span class="line">    <span class="keyword">void</span> (*log_message)(<span class="keyword">char</span> *message, <span class="keyword">int</span> syslog_type_int);<span class="comment">//用来输出错误信息,对于CLI来说,只是简单的输出到stderr</span></span><br><span class="line">    <span class="keyword">double</span> (*get_request_time)(<span class="keyword">void</span>);<span class="comment">//获取请求时间,只有apach2自定义了,默认为获取当前时间</span></span><br><span class="line">    <span class="keyword">void</span> (*terminate_process)(<span class="keyword">void</span>);<span class="comment">//没有任何SAPI用到,无用代码</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//STANDARD_SAPI_MODULE_PROPERTIES</span></span><br><span class="line">    <span class="keyword">char</span> *php_ini_path_override;</span><br><span class="line">    <span class="keyword">void</span> (*default_post_reader)(<span class="keyword">void</span>);</span><br><span class="line">    <span class="keyword">void</span> (*treat_data)(<span class="keyword">int</span> arg, <span class="keyword">char</span> *str, zval *destArray);</span><br><span class="line">    <span class="keyword">char</span> *executable_location;</span><br><span class="line">    <span class="keyword">int</span> php_ini_ignore;</span><br><span class="line">    <span class="keyword">int</span> php_ini_ignore_cwd;</span><br><span class="line">    <span class="keyword">int</span> (*get_fd)(<span class="keyword">int</span> *fd);</span><br><span class="line">    <span class="keyword">int</span> (*force_http_10)(<span class="keyword">void</span>);</span><br><span class="line">    <span class="keyword">int</span> (*get_target_uid)(<span class="keyword">uid_t</span> *);</span><br><span class="line">    <span class="keyword">int</span> (*get_target_gid)(<span class="keyword">gid_t</span> *);</span><br><span class="line">    <span class="function"><span class="keyword">unsigned</span> <span class="title">int</span> <span class="params">(*input_filter)</span><span class="params">(<span class="keyword">int</span> arg, <span class="keyword">char</span> *var, <span class="keyword">char</span> **val, <span class="keyword">size_t</span> val_len, <span class="keyword">size_t</span> *new_val_len)</span></span>;</span><br><span class="line">    <span class="keyword">void</span> (*ini_defaults)(HashTable *configuration_hash);</span><br><span class="line">    <span class="keyword">int</span> phpinfo_as_text;</span><br><span class="line">    <span class="keyword">char</span> *ini_entries;</span><br><span class="line">    <span class="keyword">const</span> zend_function_entry *additional_functions;</span><br><span class="line">    <span class="function"><span class="keyword">unsigned</span> <span class="title">int</span> <span class="params">(*input_filter_init)</span><span class="params">(<span class="keyword">void</span>)</span></span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="cli-sapi-module-的定义"><a href="#cli-sapi-module-的定义" class="headerlink" title="cli_sapi_module 的定义"></a>cli_sapi_module 的定义</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> sapi_module_struct cli_sapi_module = &#123;</span><br><span class="line">    <span class="string">"cli"</span>,                            <span class="comment">/* name */</span></span><br><span class="line">    <span class="string">"Command Line Interface"</span>,        <span class="comment">/* pretty name */</span></span><br><span class="line"></span><br><span class="line">    php_cli_startup,                <span class="comment">/* startup */</span></span><br><span class="line">    php_module_shutdown_wrapper,    <span class="comment">/* shutdown */</span></span><br><span class="line">    <span class="literal">NULL</span>,                            <span class="comment">/* activate */</span></span><br><span class="line">    sapi_cli_deactivate,            <span class="comment">/* deactivate */</span></span><br><span class="line"></span><br><span class="line">    sapi_cli_ub_write,                <span class="comment">/* unbuffered write */</span></span><br><span class="line">    sapi_cli_flush,                    <span class="comment">/* flush */</span></span><br><span class="line">    <span class="literal">NULL</span>,                            <span class="comment">/* get uid */</span></span><br><span class="line">    <span class="literal">NULL</span>,                            <span class="comment">/* getenv */</span></span><br><span class="line"></span><br><span class="line">    php_error,                        <span class="comment">/* error handler */</span></span><br><span class="line">    sapi_cli_header_handler,        <span class="comment">/* header handler */</span></span><br><span class="line">    sapi_cli_send_headers,            <span class="comment">/* send headers handler */</span></span><br><span class="line">    sapi_cli_send_header,            <span class="comment">/* send header handler */</span></span><br><span class="line"></span><br><span class="line">    <span class="literal">NULL</span>,                            <span class="comment">/* read POST data */</span></span><br><span class="line">    sapi_cli_read_cookies,          <span class="comment">/* read Cookies */</span></span><br><span class="line"></span><br><span class="line">    sapi_cli_register_variables,    <span class="comment">/* register server variables */</span></span><br><span class="line">    sapi_cli_log_message,            <span class="comment">/* Log message */</span></span><br><span class="line">    <span class="literal">NULL</span>,                            <span class="comment">/* Get request time */</span></span><br><span class="line">    <span class="literal">NULL</span>,                            <span class="comment">/* Child terminate */</span></span><br><span class="line"></span><br><span class="line">    STANDARD_SAPI_MODULE_PROPERTIES</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/PHP/" rel="tag"># PHP</a>
+          
+            <a href="/tags/内核/" rel="tag"># 内核</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/08/20/2018-08-20-PhpExtensions/" rel="next" title="PHP-扩展(Extensions)">
+                <i class="fa fa-chevron-left"></i> PHP-扩展(Extensions)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/11/17/2018-11-17-ZVAL/" rel="prev" title="PHP-数据结构(ZVAL)">
+                PHP-数据结构(ZVAL) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">china-cb</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">46</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#SAPI"><span class="nav-number">1.</span> <span class="nav-text">SAPI</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#sapi模块结构体"><span class="nav-number">1.0.1.</span> <span class="nav-text">sapi模块结构体</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cli-sapi-module-的定义"><span class="nav-number">1.1.</span> <span class="nav-text">cli_sapi_module 的定义</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">china-cb</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

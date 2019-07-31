@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="watch,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="大型网站的特点 高并发、大流量：PV(page view)量巨大 高可用：7*24小时不间断服务 海量数据：需要存储、管理海量数据，需要使用大量服务器 用户分布广泛，网络情况复杂：网络运营商 安全环境恶劣：黑客的攻击 需求快速变更，发布频繁：快速适应市场，满足用户需求 渐进式发展：与传统软件产品或企业应用系统一开始就规划好全部的功能和非功能需求不同，几乎所有的大型互联网网站都是从一个小网站开始的，">
+<meta name="keywords" content="watch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="大型网站架构的特点及演化">
+<meta property="og:url" content="https://china-cb.github.io/2019/06/18/2019-06-18-TechnicalArchitectureofLargeWebsite01/index.html">
+<meta property="og:site_name" content="胡霸的博客">
+<meta property="og:description" content="大型网站的特点 高并发、大流量：PV(page view)量巨大 高可用：7*24小时不间断服务 海量数据：需要存储、管理海量数据，需要使用大量服务器 用户分布广泛，网络情况复杂：网络运营商 安全环境恶劣：黑客的攻击 需求快速变更，发布频繁：快速适应市场，满足用户需求 渐进式发展：与传统软件产品或企业应用系统一开始就规划好全部的功能和非功能需求不同，几乎所有的大型互联网网站都是从一个小网站开始的，">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://china-cb.github.io/images/Framework/001.png">
+<meta property="og:image" content="https://china-cb.github.io/images/Framework/002.png">
+<meta property="og:image" content="https://china-cb.github.io/images/Framework/003.png">
+<meta property="og:image" content="https://china-cb.github.io/images/Framework/004.png">
+<meta property="og:image" content="https://china-cb.github.io/images/Framework/005.png">
+<meta property="og:image" content="https://china-cb.github.io/images/Framework/006.png">
+<meta property="og:image" content="https://china-cb.github.io/images/Framework/007.png">
+<meta property="og:image" content="https://china-cb.github.io/images/Framework/008.png">
+<meta property="og:image" content="https://china-cb.github.io/images/Framework/009.png">
+<meta property="og:image" content="https://china-cb.github.io/images/Framework/010.png">
+<meta property="og:updated_time" content="2019-07-31T13:57:51.491Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="大型网站架构的特点及演化">
+<meta name="twitter:description" content="大型网站的特点 高并发、大流量：PV(page view)量巨大 高可用：7*24小时不间断服务 海量数据：需要存储、管理海量数据，需要使用大量服务器 用户分布广泛，网络情况复杂：网络运营商 安全环境恶劣：黑客的攻击 需求快速变更，发布频繁：快速适应市场，满足用户需求 渐进式发展：与传统软件产品或企业应用系统一开始就规划好全部的功能和非功能需求不同，几乎所有的大型互联网网站都是从一个小网站开始的，">
+<meta name="twitter:image" content="https://china-cb.github.io/images/Framework/001.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://china-cb.github.io/2019/06/18/2019-06-18-TechnicalArchitectureofLargeWebsite01/">
+
+
+
+
+
+  <title>大型网站架构的特点及演化 | 胡霸的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">胡霸的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Self-discipline gives freedom</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://china-cb.github.io/2019/06/18/2019-06-18-TechnicalArchitectureofLargeWebsite01/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="china-cb">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="胡霸的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">大型网站架构的特点及演化</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-06-18T00:00:00+08:00">
+                2019-06-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/架构/" itemprop="url" rel="index">
+                    <span itemprop="name">架构</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="大型网站的特点"><a href="#大型网站的特点" class="headerlink" title="大型网站的特点"></a>大型网站的特点</h1><ul>
+<li><code>高并发</code>、<code>大流量</code>：PV(page view)量巨大</li>
+<li><code>高可用</code>：7*24小时不间断服务</li>
+<li><code>海量数据</code>：需要存储、管理海量数据，需要使用大量服务器</li>
+<li>用户<code>分布广泛</code>，网络情况复杂：网络运营商</li>
+<li><code>安全</code>环境恶劣：黑客的攻击</li>
+<li>需求<code>快速变更</code>，发布频繁：快速适应市场，满足用户需求</li>
+<li><code>渐进式</code>发展：与传统软件产品或企业应用系统一开始就规划好全部的功能和非功能需求不同，几乎所有的大型互联网网站都是从一个小网站开始的，渐进地发展起来的<a id="more"></a>
+
+</li>
+</ul>
+<h1 id="大型网站架构演化过程"><a href="#大型网站架构演化过程" class="headerlink" title="大型网站架构演化过程"></a>大型网站架构演化过程</h1><h2 id="初始阶段的网站架构"><a href="#初始阶段的网站架构" class="headerlink" title="初始阶段的网站架构"></a>初始阶段的网站架构</h2><img src="/images/Framework/001.png">
+在初始阶段，访问量并不大，所以应用程序、数据库、文件等所有的资源都在一台服务器上。
+
+<h2 id="应用服务和数据服务分离"><a href="#应用服务和数据服务分离" class="headerlink" title="应用服务和数据服务分离"></a>应用服务和数据服务分离</h2><img src="/images/Framework/002.png">
+随着业务的发展，就会发现一台服务器抗不过来了，所以将应用服务器与数据（文件、数据库）服务器分离。三台服务器对硬件资源的要求各不相同：应用服务器需要更快的CPU，文件服务器需要更大的磁盘和带宽，数据库服务器需要更快速的磁盘和更大的内存。分离之后，三个服务器各司其职，也方便针对性的优化。
+
+<h2 id="使用缓存改善网站性能"><a href="#使用缓存改善网站性能" class="headerlink" title="使用缓存改善网站性能"></a>使用缓存改善网站性能</h2><img src="/images/Framework/003.png">
+缓存的使用无处不在，缓存的根本目的是加快访问速度。当数据库的访问压力过大的时候，就可以考虑使用缓存了。网站使用的缓存可以分为两种: 缓存在应用服务器上的本地缓存和缓存在专门的分布式缓存服务器上的远程缓存。
+
+<h2 id="使用应用服务器集群改善网站的并发处理能力"><a href="#使用应用服务器集群改善网站的并发处理能力" class="headerlink" title="使用应用服务器集群改善网站的并发处理能力"></a>使用应用服务器集群改善网站的并发处理能力</h2><img src="/images/Framework/004.png">
+随着业务的发展，单个应用服务器一定会成为瓶颈，应用服务器实现集群是网站可伸缩集群架构设计中较为简单成熟的一种。后面也会提到，将应用服务器设计为无状态的（没有需要保存的上下文信息），就可以通过增加机器，使用负载均衡来scale out。
+
+<h2 id="数据库读写分离"><a href="#数据库读写分离" class="headerlink" title="数据库读写分离"></a>数据库读写分离</h2><img src="/images/Framework/005.png">
+即使使用了缓存，但在缓存未命中、或者缓存服务时效的情况下，还是需要访问数据库，这个时候就需要数据库的读写分离：主库提供写操作，从库提供读服务。注意，在上图中增加了一个数据访问模块，可以对应用层透明数据库的主从分离信息。
+
+<h2 id="使用反向代理和CDN-加速网站晌应"><a href="#使用反向代理和CDN-加速网站晌应" class="headerlink" title="使用反向代理和CDN 加速网站晌应"></a>使用反向代理和CDN 加速网站晌应</h2><img src="/images/Framework/006.png">
+CDN和反向代理其实都是缓存，区别在于CDN 部署在网络提供商的机房；而反向代理则部署在网站的中心机房。使用CDN 和反向代理的目的都是尽旱返回数据给用户， 一方面加快用户访问速度，另一方面也减轻后端服务器的负载压力。
+
+<h2 id="使用分布式文件系统和分布式数据库系统"><a href="#使用分布式文件系统和分布式数据库系统" class="headerlink" title="使用分布式文件系统和分布式数据库系统"></a>使用分布式文件系统和分布式数据库系统</h2><img src="/images/Framework/007.png">
+单个物理机的磁盘是有限的，单个关系数据库的处理能力也是有上限的，所以需要分布式文件存储与分布式数据库。当然，也需要”统一数据访问模块“，使得应用层不用关心文件、数据的具体位置。值得一提的事，关系型数据库自身并没有很好的水平扩展方案，因此一般都需要一个数据库代理层，如cobar、mycat。
+
+<h2 id="使用NoSQL-和搜索引擎"><a href="#使用NoSQL-和搜索引擎" class="headerlink" title="使用NoSQL 和搜索引擎"></a>使用NoSQL 和搜索引擎</h2><img src="/images/Framework/008.png">
+很多应用并一定适合用关系数据库存储，更加灵活的NoSql能更加方便的解决一些问题，而且NoSQL天然就支持分布式。专门的搜索引擎在提供更优质服务的同时，也大大减轻了数据库的压力。
+
+<h2 id="业务拆分"><a href="#业务拆分" class="headerlink" title="业务拆分"></a>业务拆分</h2><img src="/images/Framework/009.png">
+将一个网站拆分成许多不同的应用， 每个应用独立部署维护。应用之间可以通过一个超链接建立关系(在首页上的导航链接每个都指向不同的应用地址) ，也可以通过消息队列进行数据分发， 当然最多的还是通过访问同一个数据存储系统来构成一个关联的完整系统
+
+<h2 id="分布式服务"><a href="#分布式服务" class="headerlink" title="分布式服务"></a>分布式服务</h2><img src="/images/Framework/010.png">
+既然每一个应用系统都需要执行许多相同的业务操作， 比如用户管理、商品管理等，那么可以将这些共用的业务提取出来，独立部署。
+
+<p>通过服务的分布式，各个应用能更好的独立发展，实现了从依赖模块到依赖服务的过渡。将通用的公共服务独立出来，也方便做服务管控，比如对各个应用的服务请求进行监控，在高峰时期限制、关闭某些应用的访问等。</p>
+<h1 id="大型网站架构价值观与设计误区"><a href="#大型网站架构价值观与设计误区" class="headerlink" title="大型网站架构价值观与设计误区"></a>大型网站架构价值观与设计误区</h1><h2 id="价值观"><a href="#价值观" class="headerlink" title="价值观"></a>价值观</h2><h4 id="核心价值"><a href="#核心价值" class="headerlink" title="核心价值"></a>核心价值</h4><p>随网站所需灵活应对，大型网站不是从无到有一步就搭建好一个大型网站，而是能够伴随小型网站业务的渐进发展，慢慢地演化成一个大型网站。</p>
+<h4 id="驱动力量"><a href="#驱动力量" class="headerlink" title="驱动力量"></a>驱动力量</h4><p>网站的业务发展—业务成就了技术，事业成就了人，而不是相反。</p>
+<h2 id="设计误区"><a href="#设计误区" class="headerlink" title="设计误区"></a>设计误区</h2><ol>
+<li><p>一味追随大公司的解决方案。</p>
+</li>
+<li><p>为了技术而技术，常见问题。</p>
+</li>
+<li><p>企图用技术解决所有问题：技术是用来解决业务问题的，而业务的问题，也可以通过业务的手段去解决。</p>
+</li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/watch/" rel="tag"># watch</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/06/06/2019-06-06-HEXO/" rel="next" title="HEXO使用记录">
+                <i class="fa fa-chevron-left"></i> HEXO使用记录
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/06/23/2019-06-23-ubuntu/" rel="prev" title="ubuntu18.04优化">
+                ubuntu18.04优化 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">china-cb</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">46</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#大型网站的特点"><span class="nav-number">1.</span> <span class="nav-text">大型网站的特点</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#大型网站架构演化过程"><span class="nav-number">2.</span> <span class="nav-text">大型网站架构演化过程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#初始阶段的网站架构"><span class="nav-number">2.1.</span> <span class="nav-text">初始阶段的网站架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#应用服务和数据服务分离"><span class="nav-number">2.2.</span> <span class="nav-text">应用服务和数据服务分离</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用缓存改善网站性能"><span class="nav-number">2.3.</span> <span class="nav-text">使用缓存改善网站性能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用应用服务器集群改善网站的并发处理能力"><span class="nav-number">2.4.</span> <span class="nav-text">使用应用服务器集群改善网站的并发处理能力</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据库读写分离"><span class="nav-number">2.5.</span> <span class="nav-text">数据库读写分离</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用反向代理和CDN-加速网站晌应"><span class="nav-number">2.6.</span> <span class="nav-text">使用反向代理和CDN 加速网站晌应</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用分布式文件系统和分布式数据库系统"><span class="nav-number">2.7.</span> <span class="nav-text">使用分布式文件系统和分布式数据库系统</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用NoSQL-和搜索引擎"><span class="nav-number">2.8.</span> <span class="nav-text">使用NoSQL 和搜索引擎</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#业务拆分"><span class="nav-number">2.9.</span> <span class="nav-text">业务拆分</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分布式服务"><span class="nav-number">2.10.</span> <span class="nav-text">分布式服务</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#大型网站架构价值观与设计误区"><span class="nav-number">3.</span> <span class="nav-text">大型网站架构价值观与设计误区</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#价值观"><span class="nav-number">3.1.</span> <span class="nav-text">价值观</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#核心价值"><span class="nav-number">3.1.0.1.</span> <span class="nav-text">核心价值</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#驱动力量"><span class="nav-number">3.1.0.2.</span> <span class="nav-text">驱动力量</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#设计误区"><span class="nav-number">3.2.</span> <span class="nav-text">设计误区</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">china-cb</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
